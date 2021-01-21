@@ -1,0 +1,115 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bitcoin.fullname" . }}-headless
+  labels:
+    {{- include "bitcoin.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+{{- range .Values.service.services }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .name }}
+{{- end }}
+  selector:
+    {{- include "bitcoin.selectorLabels" . | nindent 4 }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "bitcoin.fullname" . }}
+  labels:
+    {{- include "bitcoin.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: {{ .Values.statefulset.podManagementPolicy }}
+  serviceName: {{ include "bitcoin.fullname" . }}-headless
+  selector:
+    matchLabels:
+      {{- include "bitcoin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "bitcoin.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
+      serviceAccountName: {{ include "bitcoin.serviceAccountName" . }}
+      initContainers:
+        - name: copy-bitcoind-config
+          image: busybox
+          command: ['sh', '-c', 'cp -vf /mnt/config/bitcoin.conf /mnt/data/bitcoin.conf']
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/data
+            - name: config
+              mountPath: /mnt/config
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if not (empty .Values.environment) }}
+            {{- with .Values.environment }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}                          
+            {{- end }}
+          volumeMounts:
+            - mountPath: /bitcoin/.bitcoin
+              name: data
+          ports:
+            {{- range .Values.service.services }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+              protocol: {{ .protocol }}
+            {{- end }}
+            {{- if .Values.lifecycle }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+            {{- end }}
+            {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "bitcoin.fullname" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"] 
+      {{- if .Values.statefulset.volumeClaimTemplates.storageClassName }}
+      storageClassName: {{ .Values.statefulset.volumeClaimTemplates.storageClassName }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.statefulset.volumeClaimTemplates.storage }}
+
+  {{- with .Values.statefulset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
