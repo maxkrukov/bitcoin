@@ -3,12 +3,12 @@ entries:
   bitcoin:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-02-02T17:57:04.145592569+02:00"
+    created: "2021-02-02T18:04:04.222595383+02:00"
     description: A Helm chart for Kubernetes
     digest: 68e7486ab48ce8f298cf9ff6d24b36f8fffcf66cb70d315641938f2541b5e16e
     name: bitcoin
     type: application
     urls:
-    - https://raw.githubusercontent.com/maxkrukov/base-chart/main/bitcoin-0.1.0.tgz
+    - https://raw.githubusercontent.com/maxkrukov/bitcoin/main/bitcoin-0.1.0.tgz
     version: 0.1.0
-generated: "2021-02-02T17:57:04.144989412+02:00"
+generated: "2021-02-02T18:04:04.221708065+02:00"
