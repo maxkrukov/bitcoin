@@ -86,16 +86,14 @@ affinity: {}
 
 ingress:
   enabled: false
-  perPod:
-  - index: 0
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: bitcoin-0.dom.ltd
-        paths: ["/"]
-        servicePort: "8332"
-    tls:
-      - secretName: bitcoin-0-dom-ltd
-        hosts:
-          - bitcoin-0.dom.ltd
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: bitcoin-0.dom.ltd
+      paths: ["/"]
+      servicePort: "8332"
+  tls:
+    - secretName: bitcoin-0-dom-ltd
+      hosts:
+        - bitcoin-0.dom.ltd
