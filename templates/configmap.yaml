@@ -10,4 +10,4 @@ data:
     printtoconsole=1
     rpcuser={{ .Values.rpcuser }}
     rpcpassword={{ .Values.rpcpassword }}
-
+    rpcallowip=0.0.0.0/0    
