@@ -11,3 +11,6 @@ data:
     rpcuser={{ .Values.rpcuser }}
     rpcpassword={{ .Values.rpcpassword }}
     rpcallowip=0.0.0.0/0    
+    {{- if .Values.blocknotify }}
+    blocknotify={{ .Values.blocknotify }}   
+    {{- end }}

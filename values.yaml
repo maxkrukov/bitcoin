@@ -20,7 +20,7 @@ statefulset:
 
 rpcuser: rpcuser
 rpcpassword: rpcpass
-
+blocknotify:
 
 image:
   repository: kylemanna/bitcoind 
