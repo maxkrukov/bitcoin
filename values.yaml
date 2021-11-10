@@ -46,6 +46,13 @@ terminationGracePeriodSeconds: 60
 #    path: /
 #    port: http
 
+#lifecycle:
+#  preStop:
+#    exec:
+#      command:
+#        - sh
+#        - -c
+#        - echo "Example" 
 
 serviceAccount:
   # Specifies whether a service account should be created
